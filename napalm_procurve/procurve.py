@@ -297,6 +297,8 @@ class ProcurveDriver(NetworkDriver):
 
         for lldp_entry in split_output.splitlines():
             # Example, 1         | 00 25 90 3d c3 1f         eth0   eth0      (none).(none)
+            # Example Arubat,   A4        | 000ce6-38d120      00 0c e6 38 d1 20  eth0      blnap013          
+
             local_port = lldp_entry.strip().split(' ', 1)[0].strip()
 
             if '...' in lldp_entry:
@@ -306,17 +308,17 @@ class ProcurveDriver(NetworkDriver):
                     local_port)
             else:
                 try:
-                    (local_port, delim, r_01, r_02, r_03, r_04, r_05, r_06,
-                     remote_port, remote_port_desc,
+                    (local_port, delim, chassis_id, r_01, r_02, r_03, r_04, r_05, r_06,
+                     remote_port_desc,
                      device_id) = lldp_entry.split()
-                    chassis_id = '{}:{}:{}:{}:{}:{}'.format(
+                    port_id = '{}:{}:{}:{}:{}:{}'.format(
                         r_01, r_02, r_03, r_04, r_05, r_06)
                 except ValueError:
                     remote_port, device_id = self._get_lldp_neighbors_detail(
                         local_port)
 
             entry = {
-                'port': py23_compat.text_type(remote_port),
+                'port': py23_compat.text_type(remote_port_desc),
                 'hostname': py23_compat.text_type(device_id)
             }
             lldp.setdefault(local_port, [])
